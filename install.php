@@ -14,11 +14,11 @@ foreach ($structure as $dir) {
 }
 
 $files = [
-    'WebComposer.php',
-    'PackageResolver.php',
-    'AutoloadGenerator.php',
+    'Composer.php',
+    'Package.php',
+    'Autoload.php',
     'Semver.php',
-    'HttpClient.php'
+    'Http.php'
 ];
 
 $baseUrl = 'https://raw.githubusercontent.com/MINTILER-DEV/webcomposer/main/src/';
