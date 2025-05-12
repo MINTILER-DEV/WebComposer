@@ -1,21 +1,35 @@
 <?php
-
+/**
+ * WebComposer - Lightweight dependency manager for shared hosting
+ */
 class WebComposer
 {
     private $requires = [];
     private $installed = [];
 
+    /**
+     * Add a package requirement
+     * @param string $package Package name (vendor/package)
+     * @param string $constraint Version constraint
+     */
     public function require(string $package, string $constraint = 'dev-master'): void
     {
         $this->requires[$package] = $constraint;
     }
 
+    /**
+     * Install all required packages
+     * @throws RuntimeException On installation failure
+     */
     public function install(): void
     {
         $this->resolveDependencies();
         $this->generateAutoloader();
     }
 
+    /**
+     * Resolve and install dependencies
+     */
     private function resolveDependencies(): void
     {
         $queue = new \SplQueue();
@@ -48,6 +62,9 @@ class WebComposer
         }
     }
 
+    /**
+     * Generate autoloader for installed packages
+     */
     private function generateAutoloader(): void
     {
         foreach ($this->installed as $package) {
