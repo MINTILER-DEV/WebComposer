@@ -26,7 +26,7 @@ just download install.php and run it.
 
 ### Basic Usage
 ```php
-require_once 'src/WebComposer.php';
+require_once 'src/Composer.php';
 
 $composer = new WebComposer();
 $composer->require('psr/log', '^1.1');
@@ -72,7 +72,7 @@ To use this in your project:
 Example bootstrap.php:
 ```php
 <?php
-require_once 'src/WebComposer.php';
+require_once 'WebComposer.php';
 
 // Initialize and install dependencies
 $webComposer = new WebComposer();
