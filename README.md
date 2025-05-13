@@ -55,7 +55,7 @@ require __DIR__ . '/vendor/autoload.php';
 - write permissions to project directory
 
 ## Limitations
-- No support for dev dependencies
+- Minimal support for dev dependencies
 - No script execution
 - Simplified version resolution compared to Composer
 
