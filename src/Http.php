@@ -11,7 +11,7 @@ class HttpClient
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_HTTPHEADER => [
-                'User-Agent: AdvancedComposer/1.0',
+                'User-Agent: WebComposer/1.1',
                 'Accept: application/json'
             ],
             CURLOPT_TIMEOUT => 30,
@@ -42,7 +42,7 @@ class HttpClient
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_HTTPHEADER => [
-                'User-Agent: AdvancedComposer/1.0'
+                'User-Agent: WebComposer/1.1'
             ],
             CURLOPT_TIMEOUT => 300,
             CURLOPT_HEADERFUNCTION => function($curl, $header) {

@@ -2,6 +2,11 @@
 /**
  * WebComposer - Lightweight dependency manager for shared hosting
  */
+require 'Semver.php';
+require 'Package.php';
+require 'Autoload.php';
+require 'Http.php';
+
 class WebComposer
 {
     private $requires = [];

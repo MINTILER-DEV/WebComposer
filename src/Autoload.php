@@ -27,8 +27,11 @@ class AutoloadGenerator
             } else {
                 foreach ($entries as $prefix => $paths) {
                     $fullPaths = array_map(fn($p) => "$path/$p", (array)$paths);
+                    if (!isset(self::$mappings[$type][$prefix])) {
+                        self::$mappings[$type][$prefix] = [];
+                    }
                     self::$mappings[$type][$prefix] = array_merge(
-                        self::$mappings[$type][$prefix] ?? [],
+                        self::$mappings[$type][$prefix],
                         $fullPaths
                     );
                 }
@@ -38,6 +41,64 @@ class AutoloadGenerator
 
     public static function generate(): void
     {
+        // Load existing autoloader if it exists
+        $existingLoader = [];
+        $loaderFile = 'vendor/autoload.php';
+        if (file_exists($loaderFile)) {
+            $content = file_get_contents($loaderFile);
+            preg_match_all('/\/\/ psr-4 autoloading.*?if \(strpos\(\$class, \'(.*?)\\\\\\) === 0\) {.*?paths = \[(.*?)\];/s', $content, $psr4Matches);
+            preg_match_all('/\/\/ psr-0 autoloading.*?if \(strpos\(\$class, \'(.*?)\\\\\\) === 0\) {.*?paths = \[(.*?)\];/s', $content, $psr0Matches);
+            preg_match('/\$classMap = (\[.*?\])/s', $content, $classMapMatch);
+            preg_match('/foreach \(array \((.*?)\) as \$file\)/s', $content, $filesMatch);
+
+            // Merge existing PSR-4 mappings
+            foreach ($psr4Matches[1] as $i => $prefix) {
+                $paths = array_map('trim', explode(',', $psr4Matches[2][$i]));
+                $paths = array_map(fn($p) => trim($p, "'\""), $paths);
+                if (!isset(self::$mappings['psr-4'][$prefix])) {
+                    self::$mappings['psr-4'][$prefix] = [];
+                }
+                self::$mappings['psr-4'][$prefix] = array_merge(
+                    self::$mappings['psr-4'][$prefix],
+                    $paths
+                );
+            }
+
+            // Merge existing PSR-0 mappings
+            foreach ($psr0Matches[1] as $i => $prefix) {
+                $paths = array_map('trim', explode(',', $psr0Matches[2][$i]));
+                $paths = array_map(fn($p) => trim($p, "'\""), $paths);
+                if (!isset(self::$mappings['psr-0'][$prefix])) {
+                    self::$mappings['psr-0'][$prefix] = [];
+                }
+                self::$mappings['psr-0'][$prefix] = array_merge(
+                    self::$mappings['psr-0'][$prefix],
+                    $paths
+                );
+            }
+
+            // Merge existing classmap
+            if (!empty($classMapMatch[1])) {
+                eval('$existingClassMap = ' . $classMapMatch[1] . ';');
+                foreach ($existingClassMap as $class => $file) {
+                    if (!isset(self::$mappings['classmap'][$class])) {
+                        self::$mappings['classmap'][$class] = $file;
+                    }
+                }
+            }
+
+            // Merge existing files
+            if (!empty($filesMatch[1])) {
+                $existingFiles = array_map('trim', explode(',', $filesMatch[1]));
+                $existingFiles = array_map(fn($f) => trim($f, "'\""), $existingFiles);
+                self::$mappings['files'] = array_merge(
+                    self::$mappings['files'],
+                    $existingFiles
+                );
+            }
+        }
+
+        // Generate new autoloader with all mappings
         $loader = '<?php // AUTO GENERATED AUTOLOADER' . PHP_EOL;
         $loader .= 'spl_autoload_register(function ($class) {' . PHP_EOL;
         $loader .= self::generateClassMapCode();
@@ -46,7 +107,7 @@ class AutoloadGenerator
         $loader .= '});' . PHP_EOL;
         $loader .= self::generateFilesCode();
         
-        file_put_contents('vendor/autoload.php', $loader);
+        file_put_contents($loaderFile, $loader);
     }
 
     private static function generateClassMapCode(): string
